@@ -1,5 +1,5 @@
-import cloudinary from 'cloudinary';
-import fs from 'fs';
+const cloudinary=require('cloudinary');
+const fs=require('fs');
 
 // Configure Cloudinary with your credentials
 cloudinary.config({ 
@@ -30,4 +30,4 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 };
 
-export { uploadOnCloudinary };
+module.exports=  uploadOnCloudinary;
