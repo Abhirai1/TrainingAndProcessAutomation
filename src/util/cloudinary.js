@@ -1,5 +1,7 @@
-const cloudinary=require('cloudinary');
-const fs=require('fs');
+require('dotenv').config(); // Load environment variables from .env file
+
+const cloudinary = require('cloudinary');
+const fs = require('fs');
 
 // Configure Cloudinary with your credentials
 cloudinary.config({ 
@@ -17,7 +19,7 @@ const uploadOnCloudinary = async (localFilePath) => {
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: 'auto'
         });
-        console.log("in cloudinary " + response);
+        // console.log("in cloudinary " + response);
         // Delete the locally stored file after successful upload
         fs.unlinkSync(localFilePath);
 
@@ -30,4 +32,4 @@ const uploadOnCloudinary = async (localFilePath) => {
     }
 };
 
-module.exports=  uploadOnCloudinary;
+module.exports = uploadOnCloudinary;

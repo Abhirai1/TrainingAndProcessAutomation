@@ -6,7 +6,8 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true },
     userType: { type: String, required: true },
     name: { type: String }, // Add name field
-    profilePicture: { type: String } // Add profilePicture field to store the path or URL of the profile picture
+    profilePicture: { type: String }, // Add profilePicture field to store the path or URL of the profile picture
+    skills: [{ type: String }] 
 });
 // Compile user model
 const User = mongoose.model('User', userSchema);

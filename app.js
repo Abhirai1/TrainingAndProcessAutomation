@@ -8,9 +8,12 @@ const session = require('express-session');
 const bodyParser = require('body-parser');
 const JobPosting = require('./src/models/jobPosting');
 const User = require('./src/models/user');
+const uploadOnCloudinary=require('./src/util/cloudinary')
 const PORT = process.env.PORT || 3000;
 const app = express();
+require('dotenv').config();
 
+//public folder
 app.use(express.static('public'));
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -60,30 +63,10 @@ const storage = multer.diskStorage({
 });
 
 // Initialize Multer upload
-const upload = multer({ storage: storage });
+const upload = multer({ 
+    storage: storage, 
+});
 
-// Routes
-// app.get('/', requireAuth, (req, res) => {
-//     // Redirect to appropriate page based on user type
-//     switch (req.session.userType) {
-//         case 'student':
-//             res.redirect('/student');
-//             break;
-//         case 'tnp':
-//             res.redirect('/TnP');
-//             break;
-//         case 'recruiter':
-//             res.redirect('/recruiter');
-//             break;
-//         case 'faculty':
-//         case 'hod':
-//             res.redirect('/department');
-//             break;
-//         default:
-//             res.render('home', { loggedIn: true }); // Render the home page if userType is not recognized
-//             break;
-//     }
-// });
 
 // Home route
 app.get('/', (req, res) => {
@@ -98,7 +81,7 @@ app.get('/student', requireAuth, restrictToUserType(['student']), async (req, re
 
         // Fetch user data from the database based on the logged-in user ID
         const user = await User.findById(req.session.userId);
-        console.log(user.profilePicture);
+        // console.log(user.profilePicture);
         // Pass the user data and job postings to the student.ejs view
         res.render('student', { user, jobPostings });
     } catch (error) {
@@ -216,6 +199,26 @@ app.get('/updateProfile', requireAuth, restrictToUserType(['student']), (req, re
     res.render('updateProfile');
 });
 
+app.get('/uploadDocs',requireAuth,restrictToUserType(['student']), (req, res) =>{
+    res.render('uploadDocs');
+})
+
+app.get('/skills',requireAuth,restrictToUserType(['student']), async(req, res) =>{
+    try {
+        // Retrieve user skills from the database
+        const userId = req.session.userId;
+        const user = await User.findById(userId);
+        const skills = user ? user.skills : [];
+        // console.log(skills);
+        // Render the skill.ejs view with the user's skills
+        res.render('skills', { skills });
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error fetching skills');
+    }
+})
+
+// Update profile route (POST request)
 // Update profile route (POST request)
 app.post('/update_profile', requireAuth, restrictToUserType(['student']), upload.single('profilePicture'), async (req, res) => {
     const userId = req.session.userId;
@@ -229,8 +232,13 @@ app.post('/update_profile', requireAuth, restrictToUserType(['student']), upload
             updatedFields.name = name;
         }
         if (profilePicture) {
-            // Code to upload and save profile picture to the server or cloud storage
-            updatedFields.profilePicture = '/uploads/' + profilePicture.filename; // Example: storing the file path
+            // Upload profile picture to Cloudinary
+            const cloudinaryResponse = await uploadOnCloudinary(profilePicture.path);
+            if (cloudinaryResponse) {
+                updatedFields.profilePicture = cloudinaryResponse;
+            } else {
+                throw new Error('Error uploading profile picture to Cloudinary');
+            }
         }
         await User.findByIdAndUpdate(userId, updatedFields);
 
@@ -240,6 +248,32 @@ app.post('/update_profile', requireAuth, restrictToUserType(['student']), upload
         res.status(500).send('Internal Server Error');
     }
 });
+
+
+app.post('/addSkills',requireAuth,  restrictToUserType(['student']),async (req, res) => {
+    try {
+        // Retrieve user ID from session
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.status(401).send('User not authenticated');
+        }
+
+        // Retrieve skill from request body
+        const { skill } = req.body;
+
+        // Update user's skills in the database
+        await User.findByIdAndUpdate(userId, { $push: { skills: skill } });
+
+        // Redirect back to the skill page
+        res.redirect('/skills');
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Error adding skill');
+    }
+});
+
+
+
 
 // job posting
 app.post('/job_postings', async (req, res) => {
