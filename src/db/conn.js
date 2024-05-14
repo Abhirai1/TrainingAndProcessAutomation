@@ -1,47 +1,14 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
-const User = require('../models/user');
 
-// Define sample user data
-// const usersData = [
-//     {
-//       userType: "student",
-//       email: "student@example.com",
-//       password: "KIET12345"
-//     },
-//     {
-//       userType: "faculty",
-//       email: "faculty@example.com",
-//       password: "KIET123"
-//     },
-//     {
-//       userType: "tnp",
-//       email: "tnp@example.com",
-//       password: "KIET123"
-//     },
-//     {
-//       userType: "hod",
-//       email: "hod@example.com",
-//       password: "KIET123"
-//     },
-//     {
-//       userType: "recruiter",
-//       email: "recruiter@example.com",
-//       password: "Recruiter123"
-//     }
-// ];
+// Import Mongoose models
+const Student = require('../models/student');
+const Faculty = require('../models/faculty');
+const Hod = require('../models/hod');
+const TnP = require('../models/tnp');
 
-// Hash passwords before inserting into the database
-// const hashPasswords = async () => {
-//     try {
-//         for (let user of usersData) {
-//             const hashedPassword = await bcrypt.hash(user.password, 10);
-//             user.password = hashedPassword;
-//         }
-//     } catch (error) {
-//         console.error('Error hashing passwords:', error);
-//     }
-// };
+// Default password
+const defaultPassword = 'KIET123';
 
 // MongoDB connection URL
 const mongoURL = 'mongodb://127.0.0.1:27017/TnPDatabase';
@@ -50,16 +17,60 @@ const mongoURL = 'mongodb://127.0.0.1:27017/TnPDatabase';
 mongoose.connect(mongoURL)
 .then(async () => {
     console.log('Connected to MongoDB');
-    // Hash passwords
-    // await hashPasswords();
-    // Insert sample user data into MongoDB
-    // User.insertMany(usersData)
-    // .then(() => {
-    //     console.log('Sample user data inserted successfully');
-    // })
-    // .catch((error) => {
-    //     console.error('Error inserting sample user data:', error);
-    // });
+
+    // try {
+    //     // Insert sample data for students
+    //     const studentData = [
+    //         {
+    //             rollNo: 'S001',
+    //             email: 'student1@example.com',
+    //             password: await bcrypt.hash(defaultPassword, 10),
+    //             userType: 'student'
+    //         },
+    //         // Add more student data as needed
+    //     ];
+    //     await Student.insertMany(studentData);
+
+    //     // Insert sample data for faculty
+    //     const facultyData = [
+    //         {
+    //             email: 'faculty1@example.com',
+    //             password: await bcrypt.hash(defaultPassword, 10),
+    //             userType: 'faculty',
+    //             name: 'Faculty 1'
+    //         },
+    //         // Add more faculty data as needed
+    //     ];
+    //     await Faculty.insertMany(facultyData);
+
+    //     // Insert sample data for hod
+    //     const hodData = [
+    //         {
+    //             email: 'hod@example.com',
+    //             password: await bcrypt.hash(defaultPassword, 10),
+    //             userType: 'hod',
+    //             name: 'HOD Name'
+    //         }
+    //         // Add more hod data as needed
+    //     ];
+    //     await Hod.insertMany(hodData);
+
+    //     // Insert sample data for TnP
+    //     const tnpData = [
+    //         {
+    //             email: 'tnp@example.com',
+    //             password: await bcrypt.hash(defaultPassword, 10),
+    //             userType: 'tnp',
+    //             name: 'TnP Name'
+    //         }
+    //         // Add more TnP data as needed
+    //     ];
+    //     await TnP.insertMany(tnpData);
+
+    //     console.log('Sample data inserted successfully');
+    // } catch (error) {
+    //     console.error('Error inserting sample data:', error);
+    // }
 })
 .catch((error) => {
     console.error('Error connecting to MongoDB:', error);

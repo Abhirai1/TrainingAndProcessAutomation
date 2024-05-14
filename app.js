@@ -7,8 +7,16 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const JobPosting = require('./src/models/jobPosting');
-const User = require('./src/models/user');
-const uploadOnCloudinary=require('./src/util/cloudinary')
+const User = require('./src/models/student');
+const uploadOnCloudinary=require('./src/utils/cloudinary')
+
+
+// Import Mongoose models
+const Student = require('./src/models/student');
+const Faculty = require('./src/models/faculty');
+const Hod = require('./src/models/hod');
+const TnP = require('./src/models/tnp');
+
 const PORT = process.env.PORT || 3000;
 const app = express();
 require('dotenv').config();
@@ -122,31 +130,83 @@ app.get('/login', (req, res) => {
 
 // Reset password route (POST request)
 app.post('/reset', async (req, res) => {
-    const { email, oldPassword, newPassword } = req.body;
+    const { email, oldPassword, newPassword, userType } = req.body;
     try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.send('Email not found');
+        // Verify the user's userType
+        const userType = req.body.userType;
+        console.log(userType);
+        // Find user details based on user type
+        let userDetails;
+        switch (userType) {
+            case 'student':
+                userDetails = await Student.findOne({ email });
+                break;
+            case 'faculty':
+                userDetails = await Faculty.findOne({ email });
+                break;
+            case 'hod':
+                userDetails = await Hod.findOne({ email });
+                break;
+            case 'tnp':
+                userDetails = await TnP.findOne({ email });
+                break;
+            default:
+                return res.send('Invalid user type');
         }
-        const passwordMatch = await bcrypt.compare(oldPassword, user.password);
+
+        if (!userDetails) {
+            return res.send('User details not found');
+        }
+
+        // Compare old password
+        const passwordMatch = await bcrypt.compare(oldPassword, userDetails.password);
         if (!passwordMatch) {
             return res.send('Incorrect old password');
         }
+
+        // Hash and update the new password
         const hashedPassword = await bcrypt.hash(newPassword, 10);
-        user.password = hashedPassword;
-        await user.save();
-        res.render('reset', { message: 'Password updated successfully' });
+        userDetails.password = hashedPassword;
+        await userDetails.save();
+        res.render('login');
     } catch (error) {
-        console.error("error aaya hia bhai " + error);
+        console.error('Error resetting password:', error);
         res.send('Error resetting password');
     }
 });
 
+
 // Login route (POST request)
 app.post('/login', async (req, res) => {
-  const { email, password } = req.body;
-  try {
-      const user = await User.findOne({ email });
+    const { email, password } = req.body;
+    try {
+        let user;
+        let userModel;
+  
+        // Determine the user model based on user type
+        switch (req.body.userType) {
+          case 'student':
+              userModel = require('./src/models/student');
+              break;
+          case 'tnp':
+              userModel = require('./src/models/tnp');
+              break;
+          case 'recruiter':
+              userModel = require('./src/models/recruiter');
+              break;
+          case 'faculty':
+                userModel = require('./src/models/faculty');
+                break;
+          case 'hod':
+              userModel = require('./src/models/hod');
+              break;
+          default:
+              return res.send('Invalid user type');
+      }
+  
+      // Find user by email in the appropriate model
+      user = await userModel.findOne({ email });
+  
       if (!user) {
           return res.send('Email not found');
       }
@@ -156,9 +216,9 @@ app.post('/login', async (req, res) => {
       }
       // Set up session
       req.session.userId = user._id;
-      req.session.userType = user.userType;
+      req.session.userType = req.body.userType;
       // Redirect to appropriate page based on user type
-      switch (user.userType) {
+      switch (req.body.userType) {
         case 'student':
             res.redirect('/student');
             break;
@@ -176,11 +236,12 @@ app.post('/login', async (req, res) => {
             res.redirect('/');
             break;
     }
-  } catch (error) {
-      console.error(error);
-      res.send('Error logging in');
-  }
-});
+    } catch (error) {
+        console.error(error);
+        res.send('Error logging in');
+    }
+  });
+  
 
 // Logout route
 app.get('/logout', (req, res) => {
@@ -199,8 +260,19 @@ app.get('/updateProfile', requireAuth, restrictToUserType(['student']), (req, re
     res.render('updateProfile');
 });
 
-app.get('/uploadDocs',requireAuth,restrictToUserType(['student']), (req, res) =>{
-    res.render('uploadDocs');
+app.get('/AddEducation',requireAuth,restrictToUserType(['student']), async(req, res) =>{
+    try{
+        // Retrieve user skills from the database
+        const userId = req.session.userId;
+        const user = await User.findById(userId);
+        const education = user ? user.education : [];
+        // console.log(skills);
+        // Render the skill.ejs view with the user's skills
+        res.render('AddEducation', { education });
+    }catch(error){
+        console.log(error);
+        res.status(500).send('Error fetching Educational details');
+    }
 })
 
 app.get('/skills',requireAuth,restrictToUserType(['student']), async(req, res) =>{
@@ -218,7 +290,7 @@ app.get('/skills',requireAuth,restrictToUserType(['student']), async(req, res) =
     }
 })
 
-// Update profile route (POST request)
+
 // Update profile route (POST request)
 app.post('/update_profile', requireAuth, restrictToUserType(['student']), upload.single('profilePicture'), async (req, res) => {
     const userId = req.session.userId;
@@ -272,8 +344,38 @@ app.post('/addSkills',requireAuth,  restrictToUserType(['student']),async (req, 
     }
 });
 
+app.get('/appliedStatus',requireAuth,  restrictToUserType(['student']),async (req, res) =>{
+    res.render('appliedStatus');
+});
 
+app.post('/updateEducation', async (req, res) => {
+    try {
+        // Retrieve user ID from session
+        const userId = req.session.userId;
+        if (!userId) {
+            return res.status(401).send('User not authenticated');
+        }
 
+        // Extract education details from the request body
+        const { tenthPercentage, twelfthPercentage, btechPercentage } = req.body;
+
+        // Construct the education object
+        const education = [
+            { type: '10th', percentage: parseFloat(tenthPercentage) },
+            { type: '12th', percentage: parseFloat(twelfthPercentage) },
+            { type: 'B.Tech', percentage: parseFloat(btechPercentage) }
+        ];
+
+        // Update user's education details in the database
+        await User.findByIdAndUpdate(userId, { education: education });
+
+        // Redirect back to the AddEducation page
+        res.redirect('/AddEducation');
+    } catch (error) {
+        console.error(error);
+        res.send('Error adding education details');
+    }
+});
 
 // job posting
 app.post('/job_postings', async (req, res) => {
@@ -300,6 +402,10 @@ app.post('/job_postings', async (req, res) => {
 });
 
 
+
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+
+

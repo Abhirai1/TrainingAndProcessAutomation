@@ -9,9 +9,9 @@
     background-color: #eee;
     min-height: 100vh;
     top: 0;
-    left: 80px;
+    /* left: 80px; */
     transition: all 0.5s ease;
-    width: calc(100% - 80px);
+    width: calc(100%);
     padding: 1rem;
 }
 

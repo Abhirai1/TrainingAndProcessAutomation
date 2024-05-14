@@ -37,6 +37,14 @@
             border-radius: 5px;
             box-sizing: border-box;
         }
+        select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
         button {
             width: 100%;
             padding: 10px;
@@ -56,6 +64,15 @@
     <div class="container">
         <h1>Login</h1>
         <form action="/login" method="POST">
+            <label for="userType">User Type:</label>
+            <select id="userType" name="userType" required>
+                <option>Select Your User Type</option>
+                <option value="student">Student</option>
+                <option value="faculty">Faculty</option>
+                <option value="tnp">TNP Member</option>
+                <option value="hod">HOD</option>
+                <option value="recruiter">Recruiter</option>
+              </select>
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>
             <label for="password">Password:</label>

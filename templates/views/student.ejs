@@ -23,7 +23,7 @@
             <% if (user && user.profilePicture) { %>
                 <img src="<%= user.profilePicture %>" alt="Profile Picture" class="user-img">
             <% } else { %>
-                <img src="https://example.com/default-profile-picture.jpg" alt="Profile Picture" class="user-img">
+                <img src="https://static.vecteezy.com/system/resources/previews/007/469/004/non_2x/graduated-student-in-simple-flat-personal-profile-icon-or-symbol-people-concept-illustration-vector.jpg" alt="Profile Picture" class="user-img">
             <% } %>
             <div>
                 <% if (user && user.name) { %>
@@ -42,11 +42,11 @@
                 <span class="tooltip">UpdateProfile</span>
             </li>
             <li>
-                <a href="./uploadDocs">
+                <a href="./AddEducation">
                     <i class='bx bx-data'></i>
-                    <span class="nav-item">UploadDocs</span>
+                    <span class="nav-item">AddEducation</span>
                 </a>
-                <span class="tooltip">UploadDocs</span>
+                <span class="tooltip">AddEducation</span>
             </li>
             <li>
                 <a href="./skills">
@@ -56,18 +56,18 @@
                 <span class="tooltip">Skills</span>
             </li>
             <li>
-                <a href="#">
+                <a href="./appliedStatus">
                     <i class='bx bxs-id-card'></i>
                     <span class="nav-item">AppliedStatus</span>
                 </a>
                 <span class="tooltip">AppliedStatus</span>
             </li>
             <li>
-                <a href="#">
-                    <i class="bx bx-cog"></i>
-                    <span class="nav-item">Setting</span>
+                <a href="/">
+                    <i class="bx bx-home"></i>
+                    <span class="nav-item">Home</span>
                 </a>
-                <span class="tooltip">Setting</span>
+                <span class="tooltip">Home</span>
             </li>
             <li>
                 <a href="./logout">
@@ -78,29 +78,114 @@
             </li>
         </ul>
     </div>
-    
-    <div class="job-updates">
-        <h1>New Job Updates</h1>
-        <% if (jobPostings.length> 0) { %>
-            <ul>
-                <% jobPostings.forEach(jobPosting=> { %>
-                    <li>
-                        <h3>
-                            <%= jobPosting.companyName %>
-                        </h3>
-                        <p>Profile: <%= jobPosting.profile %>
-                        </p>
-                        <p>Skills Required: <%= jobPosting.skillsRequired.join(', ') %></p>
-                            <p>Eligibility: <%= jobPosting.eligibility %></p>
-                            <p>Description: <%= jobPosting.description %></p>
-                            <p>Apply Link: <a href="<%= jobPosting.applyLink %>"><%= jobPosting.applyLink %></a></p>
-                        </li>
-                    <% }) %>
-                </ul>
-            <% } else { %>
-                <p>No job postings available</p>
-            <% } %>
+
+    <div class="main-content">                
+       <div class="top-content-home">
+        <h1 style="text-align: center;">New Job Updates</h1>
+        <button id="mode-toggle"><i class='bx bx-moon'></i><span class="nav-item">Dark Mode</span></button>
+       </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company Name</th>
+                        <th>Profile</th>
+                        <th>Skills Required</th>
+                        <th>Eligibility</th>
+                        <th>Description</th>
+                        <th>Apply</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% jobPostings.forEach(function(job) { %>
+                        <tr>
+                            <td><%= job.companyName %></td>
+                            <td><%= job.profile %></td>
+                            <td><%= job.skillsRequired.join(', ') %></td>
+                            <td><%= job.eligibility %></td>
+                            <td><%= job.description %></td>
+                            <td><a href="<%= job.applyLink %>" target="_blank"><button>Apply Now</button></a></td>
+                        </tr>
+                    <% }); %>
+                    <!-- <% jobPostings.forEach(function(job) { %>
+                        <tr>
+                            <td><%= job.companyName %></td>
+                            <td><%= job.profile %></td>
+                            <td><%= job.skillsRequired.join(', ') %></td>
+                            <td><%= job.eligibility %></td>
+                            <td><%= job.description %></td>
+                            <td><a href="<%= job.applyLink %>" target="_blank"><button>Apply Now</button></a></td>
+                        </tr>
+                    <% }); %>
+                    <% jobPostings.forEach(function(job) { %>
+                        <tr>
+                            <td><%= job.companyName %></td>
+                            <td><%= job.profile %></td>
+                            <td><%= job.skillsRequired.join(', ') %></td>
+                            <td><%= job.eligibility %></td>
+                            <td><%= job.description %></td>
+                            <td><a href="<%= job.applyLink %>" target="_blank"><button>Apply Now</button></a></td>
+                        </tr>
+                    <% }); %>
+                    <% jobPostings.forEach(function(job) { %>
+                        <tr>
+                            <td><%= job.companyName %></td>
+                            <td><%= job.profile %></td>
+                            <td><%= job.skillsRequired.join(', ') %></td>
+                            <td><%= job.eligibility %></td>
+                            <td><%= job.description %></td>
+                            <td><a href="<%= job.applyLink %>" target="_blank"><button>Apply Now</button></a></td>
+                        </tr>
+                    <% }); %>
+                    <% jobPostings.forEach(function(job) { %>
+                        <tr>
+                            <td><%= job.companyName %></td>
+                            <td><%= job.profile %></td>
+                            <td><%= job.skillsRequired.join(', ') %></td>
+                            <td><%= job.eligibility %></td>
+                            <td><%= job.description %></td>
+                            <td><a href="<%= job.applyLink %>" target="_blank"><button>Apply Now</button></a></td>
+                        </tr>
+                    <% }); %>
+                    <% jobPostings.forEach(function(job) { %>
+                        <tr>
+                            <td><%= job.companyName %></td>
+                            <td><%= job.profile %></td>
+                            <td><%= job.skillsRequired.join(', ') %></td>
+                            <td><%= job.eligibility %></td>
+                            <td><%= job.description %></td>
+                            <td><a href="<%= job.applyLink %>" target="_blank"><button>Apply Now</button></a></td>
+                        </tr>
+                    <% }); %>
+                    <% jobPostings.forEach(function(job) { %>
+                        <tr>
+                            <td><%= job.companyName %></td>
+                            <td><%= job.profile %></td>
+                            <td><%= job.skillsRequired.join(', ') %></td>
+                            <td><%= job.eligibility %></td>
+                            <td><%= job.description %></td>
+                            <td><a href="<%= job.applyLink %>" target="_blank"><button>Apply Now</button></a></td>
+                        </tr>
+                    <% }); %>
+                    <% jobPostings.forEach(function(job) { %>
+                        <tr>
+                            <td><%= job.companyName %></td>
+                            <td><%= job.profile %></td>
+                            <td><%= job.skillsRequired.join(', ') %></td>
+                            <td><%= job.eligibility %></td>
+                            <td><%= job.description %></td>
+                            <td><a href="<%= job.applyLink %>" target="_blank"><button>Apply Now</button></a></td>
+                        </tr>
+                    <% }); %> -->
+                </tbody>
+            </table>
         </div>
+    </div>
+
+
+
+
 
     <script>
         let btn = document.querySelector("#btn");
@@ -109,7 +194,31 @@
         btn.onclick = function () {
             sidebar.classList.toggle("active");
         };
+
+        // mode
+
+        let modeToggle = document.querySelector("#mode-toggle");
+        let body = document.body;
+    
+        btn.onclick = function () {
+            sidebar.classList.toggle("active");
+        };
+    
+        modeToggle.onclick = function () {
+            body.classList.toggle("dark-mode");
+            body.classList.toggle("light-mode");
+    
+            if(body.classList.contains("dark-mode")) {
+                modeToggle.innerHTML = "<i class='bx bx-sun'></i><span class='nav-item'>Light Mode</span>";
+            } else {
+                modeToggle.innerHTML = "<i class='bx bx-moon'></i><span class='nav-item'>Dark Mode</span>";
+            }
+        };
+    
+        // Set initial mode
+        body.classList.add("light-mode");
     </script>
+    
 </body>
 
 </html>
