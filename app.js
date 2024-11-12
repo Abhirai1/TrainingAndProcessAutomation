@@ -7,6 +7,7 @@ const bcrypt = require('bcrypt');
 const session = require('express-session');
 const bodyParser = require('body-parser');
 const JobPosting = require('./src/models/jobPosting');
+const Notification = require('./src/models/jobNotification')
 const User = require('./src/models/student');
 const uploadOnCloudinary=require('./src/utils/cloudinary')
 
@@ -16,6 +17,9 @@ const Student = require('./src/models/student');
 const Faculty = require('./src/models/faculty');
 const Hod = require('./src/models/hod');
 const TnP = require('./src/models/tnp');
+const JobNotification = require('./src/models/jobNotification')
+
+
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -87,11 +91,13 @@ app.get('/student', requireAuth, restrictToUserType(['student']), async (req, re
         // Fetch job postings from the database
         const jobPostings = await JobPosting.find();
 
+         const notification = await Notification.find();
+
         // Fetch user data from the database based on the logged-in user ID
         const user = await User.findById(req.session.userId);
         // console.log(user.profilePicture);
         // Pass the user data and job postings to the student.ejs view
-        res.render('student', { user, jobPostings });
+        res.render("student", { user, jobPostings, notification });
     } catch (error) {
         console.error(error);
         res.status(500).send('Error fetching data');
@@ -401,6 +407,57 @@ app.post('/job_postings', async (req, res) => {
     }
 });
 
+
+
+// palcement routes ynha pe hai
+app.get('/placement', (req,res)=>{
+    res.render('placement');
+});
+
+app.get('/notify', (req,res)=>{
+    res.render('notify');
+})
+
+// Route to handle form submission
+app.post('/submit-notification', async (req, res) => {
+    try {
+      // Create a new job notification instance
+      const newNotification = new JobNotification({
+        title: req.body.title,
+        company: req.body.company,
+        description: req.body.description,
+        expectedDate: req.body.expectedDate
+      });
+  
+      // Save the notification to the database
+      await newNotification.save();
+  
+      res.status(200).send("Notification submitted successfully!");
+    } catch (error) {
+      console.error("Error submitting notification:", error);
+      res.status(500).send("Internal server error");
+    }
+  });
+
+  // Delete notifications after expected date
+const deleteExpiredNotifications = async () => {
+    try {
+      const currentDate = new Date();
+      // Find notifications with expectedDate less than current date
+      const expiredNotifications = await JobNotification.find({ expectedDate: { $lt: currentDate } });
+  
+      // Delete expired notifications
+      for (const notification of expiredNotifications) {
+        await JobNotification.findByIdAndDelete(notification._id);
+        console.log(`Deleted notification: ${notification.title}`);
+      }
+    } catch (error) {
+      console.error("Error deleting expired notifications:", error);
+    }
+  };
+  
+  // Schedule to run deleteExpiredNotifications every day
+  setInterval(deleteExpiredNotifications, 24 * 60 * 60 * 1000);
 
 
 app.listen(PORT, () => {

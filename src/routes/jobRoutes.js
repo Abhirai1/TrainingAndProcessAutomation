@@ -1,22 +1,19 @@
+// src/routes/jobRoutes.js
+
 const express = require("express");
 const router = express.Router();
+const jobController = require("../controllers/jobController");
 const {
   requireAuth,
   restrictToUserType,
 } = require("../middleware/authMiddleware");
-const tnpController = require("../controllers/tnpController");
 
-router.get(
-  "/",
-  requireAuth,
-  restrictToUserType(["tnp"]),
-  tnpController.getTnPDashboard
-);
 router.post(
   "/job_postings",
   requireAuth,
   restrictToUserType(["tnp"]),
-  tnpController.postJob
+  jobController.addJobPosting
 );
+router.post("/submit-notification", jobController.submitNotification);
 
 module.exports = router;

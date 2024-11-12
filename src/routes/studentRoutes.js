@@ -1,28 +1,59 @@
-const express = require('express');
+// src/routes/studentRoutes.js
+const path = require("path");
+const express = require("express");
 const router = express.Router();
-const studentController = require('../controllers/studentController');
+const studentController = require("../controllers/studentController");
+const {
+  requireAuth,
+  restrictToUserType,
+} = require("../middleware/authMiddleware");
 
-const { requireAuth, restrictToUserType } = require('./userType');
+router.get(
+  "/",
+  requireAuth,
+  restrictToUserType(["student"]),
+  studentController.getStudentPage
+);
+router.get(
+  "/updateProfile",
+  requireAuth,
+  restrictToUserType(["student"]),
+  studentController.getUpdateProfilePage
+);
 
+router.get(
+  "/AddEducation",
+  requireAuth,
+  restrictToUserType(["student"]),
+  studentController.getAddEducationPage
+);
 
-// Student dashboard route
-router.get('/', requireAuth, restrictToUserType(['student']), studentController.getStudentDashboard);
+router.get(
+  "/skills",
+  requireAuth,
+  restrictToUserType(["student"]),
+  studentController.getSkillsPage
+);
 
-// Update profile route
-router.get('/updateProfile', requireAuth, restrictToUserType(['student']), studentController.getUpdateProfile);
-router.post('/update_profile', requireAuth, restrictToUserType(['student']), studentController.postUpdateProfile);
+router.post(
+  "/update_profile",
+  requireAuth,
+  restrictToUserType(["student"]),
+  studentController.updateProfile
+);
 
-// Add education route
-router.get('/AddEducation', requireAuth, restrictToUserType(['student']), studentController.getAddEducation);
+router.post(
+  "/addSkills",
+  requireAuth,
+  restrictToUserType(["student"]),
+  studentController.addSkills
+);
 
-// Update education route
-router.post('/updateEducation', requireAuth, restrictToUserType(['student']), studentController.postUpdateEducation);
-
-// Skills route
-router.get('/skills', requireAuth, restrictToUserType(['student']), studentController.getSkills);
-router.post('/addSkills', requireAuth, restrictToUserType(['student']), studentController.postAddSkills);
-
-// Applied status route
-router.get('/appliedStatus', requireAuth, restrictToUserType(['student']), studentController.getAppliedStatus);
+router.post(
+  "/updateEducation",
+  requireAuth,
+  restrictToUserType(["student"]),
+  studentController.updateEducation
+);
 
 module.exports = router;

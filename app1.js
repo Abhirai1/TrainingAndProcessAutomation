@@ -1,65 +1,54 @@
-const express = require('express');
-const dbConnection = require('./src/db/conn');
-const path = require('path');
-const ejs = require('ejs');
-const multer = require('multer');
-const bcrypt = require('bcrypt');
-const session = require('express-session');
-const bodyParser = require('body-parser');
+const express = require("express");
+const path = require("path");
+const session = require("express-session");
+const bodyParser = require("body-parser");
+const dotenv = require("dotenv");
+const dbConnection = require("./src/db/conn");
+
+// Load environment variables from .env file
+dotenv.config();
 
 // Import routes
-const studentRoutes = require('./src/routes/studentRoutes');
-const departmentRoutes = require('./src/routes/departmentRoutes');
-// const facultyRoutes = require('./src/routes/facultyRoutes');
-const tnpRoutes = require('./src/routes/tnpRoutes');
+const studentRoutes = require("./src/routes/studentRoutes");
+const authRoutes = require("./src/routes/authRoutes");
+const generalRoutes = require("./src/routes/generalRoutes");
+const jobRoutes = require("./src/routes/jobRoutes");
+const tnpRoutes = require("./src/routes/tnpRoutes");
+const departmentRoutes = require("./src/routes/departmentRoutes");
+
+// Initialize app
+const app = express();
+
+// Middleware
+app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || "your-default-secret-key",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+// Set view engine
+app.set("views", path.join(__dirname, "/templates/views"));
+app.set("view engine", "ejs");
+
+// Use routes
+app.use("/student", studentRoutes);
+app.use("/", generalRoutes);
+app.use("/", authRoutes);
+app.use("/", jobRoutes);
+app.use("/tnp", tnpRoutes);
+app.use("/department", departmentRoutes);
+
+// Error handling middleware
+// app.use(require("./src/middlewares/errorHandler"));
+
+const deleteExpiredNotifications = require("./src/utils/deleteExpiredNotifications");
+setInterval(deleteExpiredNotifications, 24 * 60 * 60 * 1000);
 
 const PORT = process.env.PORT || 3000;
-const app = express();
-require('dotenv').config();
-
-// Public folder
-app.use(express.static('public'));
-app.use(bodyParser.urlencoded({ extended: true }));
-
-// Set EJS as the view engine
-app.set('views', path.join(__dirname, '/templates/views'));
-app.set('view engine', 'ejs');
-
-// Middleware for session management
-app.use(session({
-    secret: 'harekrishnaharekrishnakrishnakrishnahareharehareramharereamramramharehare', // Change this to a strong secret
-    resave: false,
-    saveUninitialized: true
-}));
-
-
-
-// Set up Multer storage
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads'); // Directory where uploaded files will be stored
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.originalname); // Use original file name for uploaded file
-    }
-});
-
-// Initialize Multer upload
-const upload = multer({ 
-    storage: storage, 
-});
-
-// Routes
-app.use('/student', studentRoutes);
-app.use('/department', departmentRoutes);
-app.use('/faculty', facultyRoutes);
-app.use('/tnp', tnpRoutes);
-
-// Default home page route
-app.get('/', (req, res) => {
-    res.render('home', { loggedIn: req.session.userId ? true : false });
-});
-
 app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}`);
 });

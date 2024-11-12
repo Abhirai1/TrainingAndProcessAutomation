@@ -1,115 +1,122 @@
-// const User = require('../models/use');
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
+const Student = require("../models/student");
+const Faculty = require("../models/faculty");
+const Hod = require("../models/hod");
+const TnP = require("../models/tnp");
 
-// Controller functions
-const authController = {
-    // Login controller
-    getLogin: (req, res) => {
-        // Render the login form
-        res.render('login');
-    },
-    postLogin: async (req, res) => {
-        const { email, password } = req.body;
-    try {
-        let user;
-        let userModel;
-  
-        // Determine the user model based on user type
-        switch (req.body.userType) {
-          case 'student':
-              userModel = require('./src/models/student');
-              break;
-          case 'tnp':
-              userModel = require('./src/models/tnp');
-              break;
-          case 'recruiter':
-              userModel = require('./src/models/recruiter');
-              break;
-          case 'faculty':
-                userModel = require('./src/models/faculty');
-                break;
-          case 'hod':
-              userModel = require('./src/models/hod');
-              break;
-          default:
-              return res.send('Invalid user type');
-      }
-  
-      // Find user by email in the appropriate model
-      user = await userModel.findOne({ email });
-  
-      if (!user) {
-          return res.send('Email not found');
-      }
-      const passwordMatch = await bcrypt.compare(password, user.password);
-      if (!passwordMatch) {
-          return res.send('Incorrect password');
-      }
-      // Set up session
-      req.session.userId = user._id;
-      req.session.userType = req.body.userType;
-      // Redirect to appropriate page based on user type
-      switch (req.body.userType) {
-        case 'student':
-            res.redirect('/student');
-            break;
-        case 'tnp':
-            res.redirect('/TnP');
-            break;
-        case 'recruiter':
-            res.redirect('/recruiter');
-            break;
-        case 'faculty':
-        case 'hod':
-            res.redirect('/department');
-            break;
-        default:
-            res.redirect('/');
-            break;
-    }
-    } catch (error) {
-        console.error(error);
-        res.send('Error logging in');
-    }
-    },
-    // Logout controller
-    logout: (req, res) => {
-        req.session.destroy((err) => {
-            if (err) {
-                console.error(err);
-                return res.send('Error logging out');
-            }
-            res.redirect('/');
-        });
-    },
-    // Reset password controller
-    getReset: (req, res) => {
-        // Render the reset password form
-        res.render('reset');
-    },
-    postReset: async (req, res) => {
-        const { email, oldPassword, newPassword } = req.body;
-        try {
-            // Find user by email
-            const user = await User.findOne({ email });
-            if (!user) {
-                return res.send('Email not found');
-            }
-            // Verify old password
-            const passwordMatch = await bcrypt.compare(oldPassword, user.password);
-            if (!passwordMatch) {
-                return res.send('Incorrect old password');
-            }
-            // Hash and update new password
-            const hashedPassword = await bcrypt.hash(newPassword, 10);
-            user.password = hashedPassword;
-            await user.save();
-            res.render('reset', { message: 'Password updated successfully' });
-        } catch (error) {
-            console.error(error);
-            res.send('Error resetting password');
-        }
-    }
+exports.getLoginPage = (req, res) => {
+  res.render("login", { redirectToLogin: req.query.redirect === "true" });
 };
 
-module.exports = authController;
+exports.login = async (req, res) => {
+  const { email, password, userType } = req.body;
+  try {
+    let user;
+    let userModel;
+
+    switch (userType) {
+      case "student":
+        userModel = Student;
+        break;
+      case "tnp":
+        userModel = TnP;
+        break;
+      case "recruiter":
+        userModel = require("../models/recruiter");
+        break;
+      case "faculty":
+        userModel = Faculty;
+        break;
+      case "hod":
+        userModel = Hod;
+        break;
+      default:
+        return res.send("Invalid user type");
+    }
+
+    user = await userModel.findOne({ email });
+    if (!user) return res.send("Email not found");
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) return res.send("Incorrect password");
+
+    req.session.userId = user._id;
+    req.session.userType = userType;
+
+    switch (userType) {
+      case "student":
+        res.redirect("/student");
+        break;
+      case "tnp":
+        res.redirect("/tnp");
+        break;
+      case "recruiter":
+        res.redirect("/recruiter");
+        break;
+      case "faculty":
+      case "hod":
+        res.redirect("/department");
+        break;
+      default:
+        res.redirect("/");
+        break;
+    }
+  } catch (error) {
+    console.error(error);
+    res.send("Error logging in");
+  }
+};
+
+exports.logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      console.error(err);
+      return res.send("Error logging out");
+    }
+    res.redirect("/");
+  });
+};
+
+exports.getResetPage = (req, res) => {
+  res.render("reset");
+};
+
+exports.resetPassword = async (req, res) => {
+  const { email, oldPassword, newPassword, userType } = req.body;
+  try {
+    let userDetails;
+    switch (userType) {
+      case "student":
+        userDetails = await Student.findOne({ email });
+        break;
+      case "faculty":
+        userDetails = await Faculty.findOne({ email });
+        break;
+      case "hod":
+        userDetails = await Hod.findOne({ email });
+        break;
+      case "tnp":
+        userDetails = await TnP.findOne({ email });
+        break;
+      default:
+        return res.send("Invalid user type");
+    }
+
+    if (!userDetails) return res.send("User details not found");
+
+    const passwordMatch = await bcrypt.compare(
+      oldPassword,
+      userDetails.password
+    );
+    if (!passwordMatch) return res.send("Incorrect old password");
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    userDetails.password = hashedPassword;
+    await userDetails.save();
+
+    res.render("login");
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.send("Error resetting password");
+  }
+};

@@ -21,6 +21,14 @@ const jobPostingSchema = new mongoose.Schema({
     applyLink: {
         type: String,
         required: true
+    },
+    lastDate: {
+        type: Date,
+        required: true
+    },
+    timing: {
+        type: String,
+        required: true
     }
 });
 
