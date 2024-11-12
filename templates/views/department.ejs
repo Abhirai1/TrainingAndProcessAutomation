@@ -1,12 +1,37 @@
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Department</title>
     <link rel="stylesheet" href="/css/departement.css">
+    <!-- Add some additional styles for the table -->
+    <style>
+        .student-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .student-table th, .student-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .student-table th {
+            background-color: #f5f5f5;
+            font-weight: bold;
+        }
+        .student-table tr:hover {
+            background-color: #f9f9f9;
+        }
+        .table-container {
+            padding: 20px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+    </style>
 </head>
-
 <body>
     <header>
         <nav>
@@ -20,23 +45,13 @@
                     <li><a href="">Pending</a></li>
                     <li class="dropdown">
                         <a href="#" class="dropbtn">Year</a>
-                        <div class="dropdown-content" onclick="updateYear(event)">
-                            <!-- Add more years as needed -->
-                            <a href="#">2023</a>
-                            <a href="#">2022</a>
-                            <a href="#">2021</a>
-                            <a href="#">2020</a>
-                            <a href="#">2019</a>
-                            <a href="#">2018</a>
-                            <a href="#">2017</a>
-                            <a href="#">2016</a>
-                            <a href="#">2015</a>
-                            <a href="#">2014</a>
+                        <div class="dropdown-content">
+                            <% for(let y = new Date().getFullYear(); y >= 2014; y--) { %>
+                                <a href="/department?year=<%= y %>" <%= selectedYear == y ? 'class="active"' : '' %>><%= y %></a>
+                            <% } %>
                         </div>
                     </li>
                     <li><a href="./logout">LogOut</a></li>
-                    <!-- <li><a href="">Admin</a></li> -->
-                    <!-- <li><a href="">Setting</a></li> -->
                 </div>
             </ul>
         </nav>
@@ -44,29 +59,64 @@
 
     <div class="main-content">
         <div class="container">
-            <h1 style="text-align: center;">CSE Department</h1>
-            <h2 id="selectedYear">Selected Year: </h2>
-            <!-- <h1>Session: 2023</h3> -->
+            <h1 style="text-align: center;"><%= faculty.department %> Department</h1>
+            <h2 id="selectedYear">Selected Year: <%= selectedYear %></h2>
         </div>
         <div class="container-detail">
             <div class="box" id="acceptedBox">
-                <h3 id="status">Total Student: <span id="acceptedCount">196</span></h3>
+                <h3 id="status">Total Student: <span id="acceptedCount"><%= statistics.totalStudents %></span></h3>
             </div>
             <div class="box" id="appliedBox">
-                <h3 id="status">Total Placed: <span id="appliedCount">138</span></h3>
+                <h3 id="status">Total Placed: <span id="appliedCount"><%= statistics.placedStudents %></span></h3>
             </div>
             <div class="box" id="rejectedBox">
-                <h3 id="status">Pending: <span id="rejectedCount">58</span></h3>
+                <h3 id="status">Pending: <span id="rejectedCount"><%= statistics.pendingStudents %></span></h3>
             </div>
         </div>
 
-        <script>
-            function updateYear(event) {
-                // console.log("hii")
-                const selectedYear = event.target.textContent;
-                document.getElementById('selectedYear').textContent = 'Selected Year: ' + selectedYear;
-            }
-        </script>
-</body>
+        <!-- Add Student Table -->
+        <div class="table-container">
+            <table class="student-table">
+                <thead>
+                    <tr>
+                        <th>Roll Number</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Placement Status</th>
+                        <th>Passout Year</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (students && students.length > 0) { %>
+                        <% students.forEach(student => { %>
+                            <tr>
+                                <td><%= student.rollNo %></td>
+                                <td><%= student.name %></td>
+                                <td><%= student.email %></td>
+                                <td><%= student.isPlaced ? 'Placed' : 'Not Placed' %></td>
+                                <td><%= student.passoutYear %></td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" style="text-align: center;">No students found for this year</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
+    <script>
+        // Update the year without page reload
+        document.querySelectorAll('.dropdown-content a').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                const year = this.textContent;
+                document.getElementById('selectedYear').textContent = 'Selected Year: ' + year;
+                window.location.href = this.href;
+            });
+        });
+    </script>
+</body>
 </html>

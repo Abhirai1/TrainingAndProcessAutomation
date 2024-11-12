@@ -18,8 +18,9 @@ const studentSchema = new mongoose.Schema({
       percentage: { type: Number, required: true },
     },
   ],
-  department: { type: String, required: true }, // E.g., "Computer Science", "Mechanical"
-  isPlaced: { type: Boolean, default: false }, // Defaults to false (not placed)
+  department: { type: String }, // E.g., "Computer Science", "Mechanical"
+  isPlaced: { type: Boolean }, // Defaults to false (not placed)
+  passoutYear: { type: Number },
 });
 
 // Compile user model

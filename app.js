@@ -114,9 +114,47 @@ app.get('/TnP', requireAuth, restrictToUserType(['tnp']), (req, res) => {
 });
 
 // Department route
-app.get('/department', requireAuth, restrictToUserType(['faculty', 'hod']), (req, res) => {
-    res.render('department');
-});
+app.get(
+  "/department",
+  requireAuth,
+  restrictToUserType(["faculty", "hod"]),
+  async (req, res) => {
+    try {
+      // Get the logged in faculty's details
+      const facultyId = req.session.userId;
+      const faculty = await Faculty.findById(facultyId);
+
+      // Get the selected year from query params, default to current year
+      const selectedYear = req.query.year || new Date().getFullYear();
+      // Fetch students based on faculty's department and selected year
+      const students = await Student.find({
+        department: faculty.department,
+        passoutYear: selectedYear,
+      }).select("name email rollNo passoutYear isPlaced"); // Select the fields you want to display
+      // Calculate statistics
+      const totalStudents = students.length;
+      const placedStudents = students.filter(
+        (student) => student.isPlaced
+      ).length; // Assuming you have an isPlaced field
+      const pendingStudents = totalStudents - placedStudents;
+
+      res.render("department", {
+        faculty,
+        students,
+        selectedYear,
+         statistics: {
+                totalStudents,
+                placedStudents,
+                pendingStudents
+            },
+        currentYear: new Date().getFullYear(),
+      });
+    } catch (error) {
+      console.error("Error fetching department data:", error);
+      res.status(500).send("Error fetching department data");
+    }
+  }
+);
 
 // Recruiter route
 app.get('/recruiter', requireAuth, restrictToUserType(['recruiter']), (req, res) => {
