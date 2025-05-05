@@ -16,7 +16,7 @@ const uploadOnCloudinary=require('./src/utils/cloudinary')
 const Student = require('./src/models/student');
 const Faculty = require('./src/models/faculty');
 const Hod = require('./src/models/hod');
-const TnP = require('./src/models/tnp');
+const TnP = require('./src/models/TnP');
 const JobNotification = require('./src/models/jobNotification')
 
 

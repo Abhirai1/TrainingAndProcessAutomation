@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 const Student = require('../models/student');
 const Faculty = require('../models/faculty');
 const Hod = require('../models/hod');
-const TnP = require('../models/tnp');
+const TnP = require('../models/TnP');
 
 require("dotenv").config();
 
