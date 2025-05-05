@@ -424,16 +424,29 @@ app.post('/updateEducation', async (req, res) => {
 // job posting
 app.post('/job_postings', async (req, res) => {
     try {
-        const { companyName, profile, skillsRequired, eligibility, description, applyLink } = req.body;
+        const {
+          companyName,
+          profile,
+          skillsRequired,
+          eligibility,
+          description,
+          applyLink,
+          lastDate,
+          timing,
+        } = req.body;
         
         // Create a new job posting document
         const jobPosting = new JobPosting({
-            companyName,
-            profile,
-            skillsRequired: skillsRequired.split(',').map(skill => skill.trim()), // Convert comma-separated skills to an array
-            eligibility,
-            description,
-            applyLink
+          companyName,
+          profile,
+          skillsRequired: skillsRequired
+            .split(",")
+            .map((skill) => skill.trim()), // Convert comma-separated skills to an array
+          eligibility,
+          description,
+          applyLink,
+          lastDate,
+          timing
         });
 
         // Save the job posting to the database
