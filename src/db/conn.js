@@ -6,14 +6,16 @@ const Student = require("../models/student");
 const Faculty = require("../models/faculty");
 const Hod = require("../models/hod");
 const TnP = require("../models/tnp");
+require("dotenv").config();
 
 // MongoDB Atlas URI – replace with your real credentials
 const mongoURL =
-  "mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.vwa2ku2.mongodb.net/TnPDatabase?retryWrites=true&w=majority&appName=Cluster0";
+  `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@cluster0.vwa2ku2.mongodb.net/TnPDatabase?retryWrites=true&w=majority&appName=Cluster0`;
 
 // ---------------------- DB Connection ----------------------
 async function connectDB() {
   try {
+    console.log(mongoURL)
     await mongoose.connect(mongoURL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
